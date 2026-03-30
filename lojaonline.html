@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Biblioteca Clássica - Marketplace de Livros</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="lojaonline.css" />
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <h1>Livraria Bibliotech</h1>
+                <span>Marketplace clássico de livros</span>
+            </div>
+            <nav class="menu">
+                <button class="menu-item active" data-page="homePage">Início</button>
+                <button class="menu-item" data-page="newPage">Livros novos</button>
+                <button class="menu-item" data-page="usedPage">Livros usados</button>
+                <button class="menu-item" data-page="promoPage">Promoções</button>
+                <button class="menu-item" data-page="myListingsPage">Meus anúncios</button>
+                <button class="menu-item" data-page="favoritesPage">Favoritos</button>
+                <button class="menu-item" data-page="cartPage">Carrinho</button>
+                <button class="menu-item" data-page="messagesPage">Mensagens</button>
+            </nav>
+            <div class="theme-control">
+                <button id="darkModeToggle">Modo Escuro</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="search-wrap">
+                    <input id="searchInput" type="search" placeholder="Buscar por título ou autor..." />
+                    <button id="searchBtn">🔍</button>
+                </div>
+                <div class="user-actions">
+                    <span id="userTitle">Visitante</span>
+                    <button id="openLoginBtn">Login / Cadastro</button>
+                </div>
+            </header>
+
+            <section id="homePage" class="page active">
+                <div class="banner classic-banner">
+                    <div class="banner-text">
+                        <h2>Bem-vindo à Livraria Bibliotech</h2>
+                        <p>Encontre clássicos, novidades e tesouros raros com a aura de uma livraria centenária.</p>
+                        <button data-page="promoPage" class="btn">Ver promoções</button>
+                    </div>
+                </div>
+
+                <div class="home-grids">
+                    <article class="card">
+                        <h3>Promoções em Destaque</h3>
+                        <ul id="promoList" class="book-card-grid"></ul>
+                    </article>
+                    <article class="card">
+                        <h3>Livros em Alta</h3>
+                        <ul id="trendingList" class="book-card-grid"></ul>
+                    </article>
+                    <article class="card">
+                        <h3>Recentemente Adicionados</h3>
+                        <ul id="recentList" class="book-card-grid"></ul>
+                    </article>
+                </div>
+            </section>
+
+            <section id="catalogPage" class="page">
+                <div class="catalog-header">
+                    <h2>Marketplace</h2>
+                    <div class="filters">
+                        <select id="categoryFilter">
+                            <option value="all">Categoria: Todos</option>
+                        </select>
+                        <select id="conditionFilter">
+                            <option value="all">Condição: Todos</option>
+                            <option value="Novo">Novo</option>
+                            <option value="Usado">Usado</option>
+                        </select>
+                        <input id="minPrice" type="number" placeholder="Preço mínimo" min="0" />
+                        <input id="maxPrice" type="number" placeholder="Preço máximo" min="0" />
+                        <button id="clearFilters" class="small-btn">Limpar filtros</button>
+                    </div>
+                </div>
+                <ul id="catalogList" class="book-card-grid"></ul>
+            </section>
+
+            <section id="newPage" class="page">
+                <h2>Livros Novos</h2>
+                <ul id="newList" class="book-card-grid"></ul>
+            </section>
+
+            <section id="usedPage" class="page">
+                <h2>Livros Usados</h2>
+                <ul id="usedList" class="book-card-grid"></ul>
+            </section>
+
+            <section id="promoPage" class="page">
+                <h2>Ofertas e Promoções</h2>
+                <ul id="allPromoList" class="book-card-grid"></ul>
+            </section>
+
+            <section id="myListingsPage" class="page">
+                <h2>Meus Anúncios</h2>
+                <button id="openCreateListing" class="btn">Cadastrar novo livro</button>
+                <ul id="myListings" class="book-card-grid"></ul>
+            </section>
+
+            <section id="favoritesPage" class="page">
+                <h2>Favoritos</h2>
+                <ul id="favoritesList" class="book-card-grid"></ul>
+            </section>
+
+            <section id="cartPage" class="page">
+                <h2>Carrinho</h2>
+                <ul id="cartList" class="cart-list"></ul>
+                <div class="cart-summary">
+                    <span>Total: R$ <strong id="cartTotal">0.00</strong></span>
+                    <button id="checkoutBtn" class="btn">Finalizar Compra</button>
+                </div>
+            </section>
+
+            <section id="messagesPage" class="page">
+                <h2>Mensagens</h2>
+                <p id="messageStatus">Envie uma mensagem ao vendedor ao ver um livro em detalhes.</p>
+                <ul id="messageList" class="message-list"></ul>
+            </section>
+
+            <div id="bookModal" class="modal">
+                <div class="modal-content">
+                    <button class="close-modal" id="closeBookModal">✕</button>
+                    <div class="modal-book-detail"></div>
+                </div>
+            </div>
+
+            <div id="userModal" class="modal">
+                <div class="modal-content small">
+                    <button class="close-modal" id="closeUserModal">✕</button>
+                    <h3>Login / Cadastro</h3>
+                    <form id="authForm" class="form">
+                        <label>Email
+                            <input type="email" id="authEmail" required placeholder="email@exemplo.com" />
+                        </label>
+                        <label>Nome
+                            <input type="text" id="authName" required placeholder="Seu nome" />
+                        </label>
+                        <label>Senha
+                            <input type="password" id="authPassword" required placeholder="Senha" />
+                        </label>
+                        <div class="switch-auth">
+                            <button type="button" id="switchToRegister" class="small-btn">Cadastrar</button>
+                            <button type="button" id="switchToLogin" class="small-btn hidden">Já tenho conta</button>
+                        </div>
+                        <button type="submit" class="btn">Continuar</button>
+                        <small id="authHint">Acesse ou crie sua conta.</small>
+                    </form>
+                </div>
+            </div>
+
+            <div id="listingModal" class="modal">
+                <div class="modal-content">
+                    <button class="close-modal" id="closeListingModal">✕</button>
+                    <h3>Cadastrar Livro para Venda</h3>
+                    <form id="listingForm" class="form">
+                        <label>Título
+                            <input type="text" id="listingTitle" required placeholder="Título completo" />
+                        </label>
+                        <label>Autor
+                            <input type="text" id="listingAuthor" required placeholder="Autor" />
+                        </label>
+                        <label>Categoria
+                            <select id="listingCategory" required>
+                                <option value="Romance">Romance</option>
+                                <option value="Fantasia">Fantasia</option>
+                                <option value="Tecnologia">Tecnologia</option>
+                                <option value="História">História</option>
+                                <option value="Infantil">Infantil</option>
+                                <option value="Autoajuda">Autoajuda</option>
+                                <option value="Clássicos">Clássicos</option>
+                            </select>
+                        </label>
+                        <label>Descrição
+                            <textarea id="listingDescription" required placeholder="Descrição detalhada"></textarea>
+                        </label>
+                        <label>Condição
+                            <select id="listingCondition" required>
+                                <option value="Novo">Novo</option>
+                                <option value="Usado">Usado</option>
+                            </select>
+                        </label>
+                        <label>Preço (R$)
+                            <input type="number" id="listingPrice" required min="1" step="0.01" />
+                        </label>
+                        <label>Link de imagem
+                            <input type="url" id="listingImage" required placeholder="https://..." />
+                        </label>
+                        <button type="submit" class="btn">Publicar Anúncio</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="checkoutModal" class="modal">
+                <div class="modal-content small">
+                    <button class="close-modal" id="closeCheckoutModal">✕</button>
+                    <h3>Finalizar Compra</h3>
+                    <p id="checkoutSummary"></p>
+                    <button id="confirmCheckout" class="btn">Confirmar</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+    <script src="lojaonline.js"></script>
+</body>
+</html>
