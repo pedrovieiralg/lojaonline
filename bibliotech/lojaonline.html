@@ -10,24 +10,6 @@
     <link rel="stylesheet" href="lojaonline.css" />
 </head>
 <body>
-    <template id="bookCardTemplate">
-        <li class="book-card">
-            <img src="" alt="" loading="lazy" decoding="async" onerror="this.src='https://via.placeholder.com/160x220?text=Sem+Capa'" />
-            <div class="book-info">
-                <h4></h4>
-                <span class="meta"></span>
-                <span class="meta"></span>
-                <span class="price"></span>
-                <span class="rating"></span>
-                <p></p>
-                <div class="book-actions">
-                    <button class="btn details-btn"></button>
-                    <button class="small-btn add-fav"></button>
-                    <button class="small-btn add-cart">🛒 Carrinho</button>
-                </div>
-            </div>
-        </li>
-    </template>
     <div class="app-shell">
         <aside class="sidebar">
             <div class="brand">
@@ -38,7 +20,6 @@
                 <button class="menu-item active" data-page="homePage">Início</button>
                 <button class="menu-item" data-page="newPage">Livros novos</button>
                 <button class="menu-item" data-page="usedPage">Livros usados</button>
-                <button class="menu-item" data-page="readPage">Livros lidos</button>
                 <button class="menu-item" data-page="promoPage">Promoções</button>
                 <button class="menu-item" data-page="myListingsPage">Meus anúncios</button>
                 <button class="menu-item" data-page="favoritesPage">Favoritos</button>
@@ -59,7 +40,6 @@
                 <div class="user-actions">
                     <span id="userTitle">Visitante</span>
                     <button id="openLoginBtn">Login / Cadastro</button>
-
                 </div>
             </header>
 
@@ -116,21 +96,6 @@
             <section id="usedPage" class="page">
                 <h2>Livros Usados</h2>
                 <ul id="usedList" class="book-card-grid"></ul>
-            </section>
-
-            <section id="readPage" class="page">
-                <h2>Livros Lidos</h2>
-                <p>Seu histórico de leitura e recomendações personalizadas com base nos títulos já lidos.</p>
-                <div class="home-grids">
-                    <article class="card">
-                        <h3>Livros marcados como lidos</h3>
-                        <ul id="readList" class="book-card-grid"></ul>
-                    </article>
-                    <article class="card">
-                        <h3>Recomendações para você</h3>
-                        <ul id="recommendedList" class="book-card-grid"></ul>
-                    </article>
-                </div>
             </section>
 
             <section id="promoPage" class="page">

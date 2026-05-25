@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    
+    
+
+    {
+      "type": "pwa-chrome",
+      "request": "launch",
+      "name": "Abrir no Chrome",
+      "url": "http://localhost:5500",
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}

@@ -79,12 +79,10 @@ body {
 .card h3 { margin-top: 0; font-family: 'Playfair Display', serif; }
 .book-card-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
 .book-card, .cart-item, .message-item { border: 1px solid #e0ccb5; border-radius: 10px; background: #fff; padding: 0.8rem; box-shadow: 0 2px 6px rgba(0,0,0,0.05); display: flex; gap: 0.7rem; }
-.book-card { overflow: hidden; }
-.book-card img { width: 80px; height: 110px; object-fit: cover; border-radius: 6px; border: 1px solid #d4b49a; flex-shrink: 0; }
-.book-info { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+.book-card img { width: 80px; height: 110px; object-fit: cover; border-radius: 6px; border: 1px solid #d4b49a; }
+.book-info { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; }
 .book-info h4 { margin: 0; font-family: 'Playfair Display', serif; }
-.book-info h4 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.book-info .meta { font-size: 0.85rem; color: var(--text-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.book-info .meta { font-size: 0.85rem; color: var(--text-soft); }
 .book-info .price { font-weight: bold; color: var(--marrom-escuro); }
 .book-actions { margin-top: auto; display: flex; gap: 0.4rem; }
 .book-actions button { flex: 1; }
@@ -96,9 +94,7 @@ body {
 .filters input { padding: 0.5rem; border-radius: 8px; border: 1px solid #d3b6a0; }
 
 .cart-list { list-style:none; margin:0; padding:0; display: grid; gap:0.7rem; }
-.cart-item { flex-direction: row; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
-.cart-item img { width: 80px; height: 110px; object-fit: cover; border-radius: 8px; border: 1px solid #d4b49a; }
-.cart-item-details { flex: 1; display: flex; flex-direction: column; gap: 0.2rem; }
+.cart-item { flex-direction: column; }
 .cart-item span { margin: 0.2rem 0; }
 .cart-summary { margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; }
 
