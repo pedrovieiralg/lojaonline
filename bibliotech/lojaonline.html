@@ -147,6 +147,15 @@
                         <label>Nome
                             <input type="text" id="authName" required placeholder="Seu nome" />
                         </label>
+                        <label class="hidden">Endereço
+                            <input type="text" id="authAddress" placeholder="Rua, número e complemento" />
+                        </label>
+                        <label class="hidden">CEP
+                            <input type="text" id="authCep" placeholder="00000-000" />
+                        </label>
+                        <label class="hidden">Bairro
+                            <input type="text" id="authBairro" placeholder="Seu bairro" />
+                        </label>
                         <label>Senha
                             <input type="password" id="authPassword" required placeholder="Senha" />
                         </label>
@@ -207,6 +216,16 @@
                     <button class="close-modal" id="closeCheckoutModal">✕</button>
                     <h3>Finalizar Compra</h3>
                     <p id="checkoutSummary"></p>
+                    <label>Forma de pagamento
+                        <select id="paymentMethod">
+                            <option value="Pix">Pix</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Boleto">Boleto</option>
+                        </select>
+                    </label>
+                    <label>Local de entrega
+                        <input type="text" id="deliveryLocation" placeholder="Endereço para entrega" />
+                    </label>
                     <button id="confirmCheckout" class="btn">Confirmar</button>
                 </div>
             </div>

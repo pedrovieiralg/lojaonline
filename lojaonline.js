@@ -8,6 +8,9 @@ const closeUserModal = document.getElementById('closeUserModal');
 const authForm = document.getElementById('authForm');
 const authEmail = document.getElementById('authEmail');
 const authName = document.getElementById('authName');
+const authAddress = document.getElementById('authAddress');
+const authCep = document.getElementById('authCep');
+const authBairro = document.getElementById('authBairro');
 const authPassword = document.getElementById('authPassword');
 const switchToRegister = document.getElementById('switchToRegister');
 const switchToLogin = document.getElementById('switchToLogin');
@@ -51,6 +54,8 @@ const checkoutBtn = document.getElementById('checkoutBtn');
 const checkoutModal = document.getElementById('checkoutModal');
 const closeCheckoutModal = document.getElementById('closeCheckoutModal');
 const checkoutSummary = document.getElementById('checkoutSummary');
+const paymentMethod = document.getElementById('paymentMethod');
+const deliveryLocation = document.getElementById('deliveryLocation');
 const confirmCheckout = document.getElementById('confirmCheckout');
 
 const msgStatus = document.getElementById('messageStatus');
@@ -423,19 +428,42 @@ function adjustCart(bookId, action) {
     renderCart();
 }
 
-function checkout() {
-    if (!currentUser) { alert('Faça login para finalizar a compra.'); return; }
-    if (cart.length === 0) { alert('Carrinho vazio.'); return; }
-
+function updateCheckoutSummary() {
     const total = cart.reduce((acc, item) => {
         const b = books.find(book => book.id === item.bookId);
         return b ? acc + b.price * item.qty : acc;
     }, 0);
-    checkoutSummary.textContent = `Você está prestes a comprar ${cart.length} itens por R$ ${total.toFixed(2)}. Confirma?`;
+
+    checkoutSummary.innerHTML = `
+        <strong>Resumo da compra:</strong><br>
+        ${cart.length} item(ns) por R$ ${total.toFixed(2)}.<br>
+        <strong>Forma de pagamento:</strong> ${paymentMethod.value || 'Pix'}<br>
+        <strong>Local de entrega:</strong> ${deliveryLocation.value.trim() || 'Endereço não informado'}
+    `;
+}
+
+function checkout() {
+    if (!currentUser) { alert('Faça login para finalizar a compra.'); return; }
+    if (cart.length === 0) { alert('Carrinho vazio.'); return; }
+
+    const userAddress = [currentUser.address, currentUser.bairro, currentUser.cep]
+        .filter(Boolean)
+        .join(', ');
+
+    deliveryLocation.value = userAddress || 'Endereço não informado';
+    updateCheckoutSummary();
     checkoutModal.classList.add('open');
 }
 
 function confirmCheckoutAction() {
+    const chosenPayment = paymentMethod.value || 'Pix';
+    const chosenDelivery = deliveryLocation.value.trim() || 'Endereço não informado';
+
+    if (!chosenDelivery) {
+        alert('Informe o local de entrega.');
+        return;
+    }
+
     cart.forEach(item => {
         const index = books.findIndex(b => b.id === item.bookId);
         if (index !== -1) books.splice(index, 1);
@@ -444,22 +472,26 @@ function confirmCheckoutAction() {
     saveAppState();
     renderAll();
     closeModal(checkoutModal);
-    alert('Compra concluída!');
+    alert(`Compra concluída! Pagamento: ${chosenPayment}. Entrega em: ${chosenDelivery}.`);
 }
 
 // Autenticação
 function setAuthMode(mode) {
     state.authMode = mode;
+    const addressFields = [authAddress, authCep, authBairro];
+
     if (mode === 'login') {
         switchToLogin.classList.add('hidden');
         switchToRegister.classList.remove('hidden');
         authHint.textContent = 'Digite e-mail e senha para entrar.';
         authName.parentElement.classList.add('hidden');
+        addressFields.forEach(field => field.parentElement.classList.add('hidden'));
     } else {
         switchToRegister.classList.add('hidden');
         switchToLogin.classList.remove('hidden');
         authHint.textContent = 'Preencha os dados para criar sua conta.';
         authName.parentElement.classList.remove('hidden');
+        addressFields.forEach(field => field.parentElement.classList.remove('hidden'));
     }
 }
 
@@ -467,14 +499,20 @@ function loginUser(event) {
     event.preventDefault();
     const email = authEmail.value.trim().toLowerCase();
     const name = authName.value.trim();
+    const address = authAddress.value.trim();
+    const cep = authCep.value.trim();
+    const bairro = authBairro.value.trim();
     const password = authPassword.value.trim();
 
-    if (!email || !password || (state.authMode === 'register' && !name)) { alert('Preencha todos os campos.'); return; }
+    if (!email || !password || (state.authMode === 'register' && (!name || !address || !cep || !bairro))) {
+        alert('Preencha todos os campos para cadastrar sua conta.');
+        return;
+    }
 
     if (state.authMode === 'login') {
         const user = users.find(u => u.email === email && u.password === password);
         if (!user) { alert('Usuário ou senha inválidos.'); return; }
-        currentUser = { email: user.email, name: user.name };
+        currentUser = { email: user.email, name: user.name, address: user.address || '', cep: user.cep || '', bairro: user.bairro || '' };
         userModal.classList.remove('open');
         renderAll();
         updateUserUI();
@@ -482,8 +520,8 @@ function loginUser(event) {
         alert('Login realizado com sucesso.');
     } else {
         if (users.some(u => u.email === email)) { alert('Email já cadastrado.'); return; }
-        users.push({ email, name, password });
-        currentUser = { email, name };
+        users.push({ email, name, password, address, cep, bairro });
+        currentUser = { email, name, address, cep, bairro };
         userModal.classList.remove('open');
         renderAll();
         updateUserUI();
@@ -530,7 +568,7 @@ function publishListing(event) {
 
 // Eventos
 menuItems.forEach(item => item.addEventListener('click', () => changePage(item.dataset.page)));
-// Banner buttons that declare `data-page` should navigate like menu items.
+// botao de navegação para páginas específicas (ex: promo, trending) usando data-page
 document.querySelectorAll('.banner [data-page]').forEach(btn => {
     btn.addEventListener('click', () => {
         const page = btn.dataset.page;
@@ -553,6 +591,8 @@ openCreateListing.addEventListener('click', () => {
 });
 closeListingModal.addEventListener('click', () => closeModal(listingModal));
 closeCheckoutModal.addEventListener('click', () => closeModal(checkoutModal));
+paymentMethod.addEventListener('change', updateCheckoutSummary);
+deliveryLocation.addEventListener('input', updateCheckoutSummary);
 checkoutBtn.addEventListener('click', checkout);
 confirmCheckout.addEventListener('click', confirmCheckoutAction);
 authForm.addEventListener('submit', loginUser);
