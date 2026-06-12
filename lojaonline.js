@@ -17,7 +17,6 @@ const switchToLogin = document.getElementById('switchToLogin');
 const authHint = document.getElementById('authHint');
 
 const searchInput = document.getElementById('searchInput');
-const bookCardTemplate = document.getElementById('bookCardTemplate');
 const searchBtn = document.getElementById('searchBtn');
 const categoryFilter = document.getElementById('categoryFilter');
 const conditionFilter = document.getElementById('conditionFilter');
@@ -32,8 +31,6 @@ const lists = {
     catalogList: document.getElementById('catalogList'),
     newList: document.getElementById('newList'),
     usedList: document.getElementById('usedList'),
-    readList: document.getElementById('readList'),
-    recommendedList: document.getElementById('recommendedList'),
     allPromoList: document.getElementById('allPromoList'),
     myListings: document.getElementById('myListings'),
     favoritesList: document.getElementById('favoritesList'),
@@ -79,10 +76,9 @@ const books = JSON.parse(localStorage.getItem('books')) || [
         price: 89.90,
         condition: 'Usado',
         seller: 'Antiga Livraria',
-            image: 'img/cem_anos_solidão.jpg',
+        image: 'https://i.imgur.com/1aRkMUp.jpg',
         rating: 4.9,
         isPromo: true,
-        read: true,
         createdAt: Date.now() - 86400000 * 3,
     },
     {
@@ -94,7 +90,7 @@ const books = JSON.parse(localStorage.getItem('books')) || [
         price: 45.50,
         condition: 'Novo',
         seller: 'Sebastião Santos',
-            image: 'img/1984.webp',
+        image: 'https://i.imgur.com/L8W4P8A.jpg',
         rating: 4.7,
         isPromo: false,
         createdAt: Date.now() - 86400000 * 6,
@@ -108,7 +104,7 @@ const books = JSON.parse(localStorage.getItem('books')) || [
         price: 109.0,
         condition: 'Novo',
         seller: 'Alice Martins',
-            image: 'img/algoritimo_python.jpg',
+        image: 'https://i.imgur.com/5W4fKQy.jpg',
         rating: 4.1,
         isPromo: true,
         createdAt: Date.now() - 86400000 * 1,
@@ -122,7 +118,7 @@ const books = JSON.parse(localStorage.getItem('books')) || [
         price: 129.9,
         condition: 'Usado',
         seller: 'Livros do Porto',
-            image: 'img/senhor_dos_aneis.webp',
+        image: 'https://i.imgur.com/q8tqv8r.jpg',
         rating: 4.8,
         isPromo: false,
         createdAt: Date.now() - 86400000 * 10,
@@ -136,10 +132,9 @@ const books = JSON.parse(localStorage.getItem('books')) || [
         price: 32.0,
         condition: 'Novo',
         seller: 'Clara Carvalho',
-            image: 'img/pequeno_principe.webp',
+        image: 'https://i.imgur.com/5a2hKj3.jpg',
         rating: 4.6,
         isPromo: true,
-        read: true,
         createdAt: Date.now() - 86400000 * 2,
     },
 ];
@@ -168,14 +163,6 @@ function saveAppState() {
 
 function generateId() {
     return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
-function markBookAsRead(bookId) {
-    const book = books.find(b => b.id === bookId);
-    if (!book || book.read) return;
-    book.read = true;
-    saveAppState();
-    renderAll();
 }
 
 function updateUserUI() {
@@ -220,47 +207,35 @@ function createStarRating(rating) {
 }
 
 function createBookCard(book) {
-    const li = bookCardTemplate.content.firstElementChild.cloneNode(true);
-    li.dataset.id = book.id;
-
-        const img = li.querySelector('img');
-        img.src = encodeURI(book.image);
-    img.alt = `Capa de ${book.title}`;
-
-    li.querySelector('h4').textContent = book.title;
-    const metas = li.querySelectorAll('.meta');
-    metas[0].textContent = `${book.author} • ${book.category} • ${book.condition}`;
-    metas[1].textContent = `Vendedor: ${book.seller}`;
-
-    li.querySelector('.price').textContent = `R$ ${book.price.toFixed(2)}`;
-    li.querySelector('.rating').textContent = `${createStarRating(book.rating)} (${book.rating.toFixed(1)})`;
-    li.querySelector('p').textContent = `${book.description.substring(0, 90)}...`;
-
-    const detailsBtn = li.querySelector('.details-btn');
-    detailsBtn.dataset.id = book.id;
-    detailsBtn.textContent = 'Detalhes';
-
-    const favBtn = li.querySelector('.add-fav');
-    favBtn.dataset.id = book.id;
-    favBtn.textContent = favorites.includes(book.id) ? '♥ Remover' : '♡ Favoritar';
-
-    const cartBtn = li.querySelector('.add-cart');
-    cartBtn.dataset.id = book.id;
-    cartBtn.textContent = '🛒 Carrinho';
-
+    const li = document.createElement('li');
+    li.className = 'book-card';
+    li.innerHTML = `
+        <img src="${book.image}" alt="Capa de ${book.title}" onerror="this.src='https://i.imgur.com/1Qx0vVP.png'" />
+        <div class="book-info">
+            <h4>${book.title}</h4>
+            <span class="meta">${book.author} • ${book.category} • ${book.condition}</span>
+            <span class="meta">Vendedor: ${book.seller}</span>
+            <span class="price">R$ ${book.price.toFixed(2)}</span>
+            <span class="rating">${createStarRating(book.rating)} (${book.rating.toFixed(1)})</span>
+            <p>${book.description.substring(0, 90)}...</p>
+            <div class="book-actions">
+                <button class="btn details-btn" data-id="${book.id}">Detalhes</button>
+                <button class="small-btn add-fav" data-id="${book.id}">${favorites.includes(book.id) ? '♥ Remover' : '♡ Favoritar'}</button>
+                <button class="small-btn add-cart" data-id="${book.id}">🛒 Carrinho</button>
+            </div>
+        </div>
+    `;
     return li;
 }
 
 function renderBookList(keys, list) {
     const container = lists[keys];
-    // If the HTML already provides static cards, preserve them (do not overwrite)
-    if (container.children.length > 0) return;
     container.innerHTML = '';
     if (list.length === 0) {
         container.innerHTML = '<li>Nenhum item encontrado.</li>';
         return;
     }
-        list.forEach(book => container.appendChild(createBookCard(book)));
+    list.forEach(book => container.appendChild(createBookCard(book)));
 }
 
 function renderAll() {
@@ -308,12 +283,9 @@ function renderCart() {
         const sub = book.price * item.qty;
         total += sub;
         li.innerHTML = `
-            <img src="${encodeURI(book.image)}" alt="Capa de ${book.title}" onerror="this.src='https://via.placeholder.com/80x110?text=Sem+Capa'" />
-            <div class="cart-item-details">
-                <strong>${book.title}</strong>
-                <span>${book.author}</span>
-                <span>R$ ${book.price.toFixed(2)} x ${item.qty} = R$ ${sub.toFixed(2)}</span>
-            </div>
+            <strong>${book.title}</strong>
+            <span>${book.author}</span>
+            <span>R$ ${book.price.toFixed(2)} x ${item.qty} = R$ ${sub.toFixed(2)}</span>
             <div class="book-actions">
                 <button class="small-btn" data-id="${book.id}" data-action="remove">-</button>
                 <button class="small-btn" data-id="${book.id}" data-action="add">+</button>
@@ -348,12 +320,11 @@ function renderMessages() {
 }
 
 function openBookModal(bookId) {
-    markBookAsRead(bookId);
     const book = books.find(b => b.id === bookId);
     if (!book) return;
     modalBookDetail.innerHTML = `
         <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-                <img src="${encodeURI(book.image)}" alt="${book.title}" style="width:180px;height:auto;border-radius:8px;border:1px solid #d1bfa8;" onerror="this.src='https://via.placeholder.com/180x260?text=Sem+Capa'" />
+            <img src="${book.image}" alt="${book.title}" style="width:180px;height:auto;border-radius:8px;border:1px solid #d1bfa8;" onerror="this.src='https://i.imgur.com/1Qx0vVP.png'" />
             <div>
                 <h3>${book.title}</h3>
                 <p><em>${book.author}</em></p>
@@ -395,18 +366,18 @@ function openBookModal(bookId) {
 function closeModal(modal) { modal.classList.remove('open'); }
 
 function toggleFavorite(bookId) {
+    if (!currentUser) { alert('Faça login para favoritar livros.'); return; }
     if (favorites.includes(bookId)) {
         favorites = favorites.filter(id => id !== bookId);
-        alert('Livro removido dos favoritos.');
     } else {
         favorites.push(bookId);
-        alert('Livro adicionado aos favoritos.');
     }
     saveAppState();
     renderAll();
 }
 
 function addToCart(bookId) {
+    if (!currentUser) { alert('Faça login para adicionar ao carrinho.'); return; }
     const item = cart.find(i => i.bookId === bookId);
     if (item) {
         item.qty += 1;
@@ -568,13 +539,6 @@ function publishListing(event) {
 
 // Eventos
 menuItems.forEach(item => item.addEventListener('click', () => changePage(item.dataset.page)));
-// botao de navegação para páginas específicas (ex: promo, trending) usando data-page
-document.querySelectorAll('.banner [data-page]').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const page = btn.dataset.page;
-        if (page) changePage(page);
-    });
-});
 openLoginBtn.addEventListener('click', () => {
     if (!currentUser) {
         userModal.classList.add('open');
@@ -621,7 +585,7 @@ darkModeToggle.addEventListener('click', () => {
 });
 
 // Delegação de eventos para botões dinâmicos
-[lists.catalogList, lists.promoList, lists.trendingList, lists.recentList, lists.newList, lists.usedList, lists.readList, lists.recommendedList, lists.allPromoList, lists.myListings, lists.favoritesList].forEach(list => {
+[lists.catalogList, lists.promoList, lists.trendingList, lists.recentList, lists.newList, lists.usedList, lists.allPromoList, lists.myListings, lists.favoritesList].forEach(list => {
     list.addEventListener('click', (e) => {
         const bookId = e.target.dataset.id;
         if (!bookId) return;
@@ -648,11 +612,6 @@ function renderAll() {
     const promoBooks = books.filter(b => b.isPromo);
     const trendingBooks = [...books].sort((a, b) => b.rating - a.rating).slice(0, 6);
     const recentBooks = [...books].sort((a, b) => b.createdAt - a.createdAt).slice(0, 6);
-    const readBooks = books.filter(b => b.read);
-    const recommendedBooks = books
-        .filter(b => !b.read && readBooks.some(read => read.category === b.category))
-        .sort((a, b) => b.rating - a.rating)
-        .slice(0, 6);
 
     renderBookList('promoList', promoBooks.slice(0, 6));
     renderBookList('trendingList', trendingBooks);
@@ -660,8 +619,6 @@ function renderAll() {
     renderBookList('allPromoList', promoBooks);
     renderBookList('newList', books.filter(b => b.condition === 'Novo'));
     renderBookList('usedList', books.filter(b => b.condition === 'Usado'));
-    renderBookList('readList', readBooks);
-    renderBookList('recommendedList', recommendedBooks.length ? recommendedBooks : books.filter(b => !b.read).sort((a, b) => b.rating - a.rating).slice(0, 6));
 
     const filtered = getFilteredBooks();
     renderBookList('catalogList', filtered);
