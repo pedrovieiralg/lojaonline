@@ -165,13 +165,22 @@ function generateId() {
     return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+// Formata valores numéricos como moeda brasileira de forma legível
+function formatCurrency(value) {
+    try {
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+    } catch (e) {
+        return `R$ ${Number(value || 0).toFixed(2)}`;
+    }
+}
+
 function updateUserUI() {
     if (currentUser) {
         userTitle.textContent = `Olá, ${currentUser.name}`;
         openLoginBtn.textContent = 'Sair';
     } else {
         userTitle.textContent = 'Visitante';
-        openLoginBtn.textContent = 'Login / Cadastro';
+        openLoginBtn.textContent = 'Entrar / Cadastrar';
     }
 }
 
@@ -215,7 +224,7 @@ function createBookCard(book) {
             <h4>${book.title}</h4>
             <span class="meta">${book.author} • ${book.category} • ${book.condition}</span>
             <span class="meta">Vendedor: ${book.seller}</span>
-            <span class="price">R$ ${book.price.toFixed(2)}</span>
+            <span class="price">${formatCurrency(book.price)}</span>
             <span class="rating">${createStarRating(book.rating)} (${book.rating.toFixed(1)})</span>
             <p>${book.description.substring(0, 90)}...</p>
             <div class="book-actions">
@@ -270,7 +279,7 @@ function renderCart() {
     lists.cartList.innerHTML = '';
     if (cart.length === 0) {
         lists.cartList.innerHTML = '<li>Seu carrinho está vazio.</li>';
-        cartTotalEl.textContent = '0.00';
+        cartTotalEl.textContent = formatCurrency(0);
         return;
     }
 
@@ -285,7 +294,7 @@ function renderCart() {
         li.innerHTML = `
             <strong>${book.title}</strong>
             <span>${book.author}</span>
-            <span>R$ ${book.price.toFixed(2)} x ${item.qty} = R$ ${sub.toFixed(2)}</span>
+            <span>${formatCurrency(book.price)} x ${item.qty} = ${formatCurrency(sub)}</span>
             <div class="book-actions">
                 <button class="small-btn" data-id="${book.id}" data-action="remove">-</button>
                 <button class="small-btn" data-id="${book.id}" data-action="add">+</button>
@@ -294,7 +303,7 @@ function renderCart() {
         `;
         lists.cartList.appendChild(li);
     });
-    cartTotalEl.textContent = total.toFixed(2);
+    cartTotalEl.textContent = formatCurrency(total);
 }
 
 function renderMessages() {
@@ -332,7 +341,7 @@ function openBookModal(bookId) {
                 <p>${createStarRating(book.rating)} (${book.rating.toFixed(1)})</p>
                 <p>${book.description}</p>
                 <p><strong>Vendedor:</strong> ${book.seller}</p>
-                <p class="price">R$ ${book.price.toFixed(2)}</p>
+                <p class="price">${formatCurrency(book.price)}</p>
                 <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.8rem;">
                     <button class="btn" id="modalCartBtn" data-id="${book.id}">Adicionar ao carrinho</button>
                     <button class="small-btn" id="modalFavBtn" data-id="${book.id}">${favorites.includes(book.id)?'♥ Remover':'♡ Favoritar'}</button>
@@ -351,14 +360,14 @@ function openBookModal(bookId) {
     document.getElementById('sendMessageBtn').addEventListener('click', () => {
         const text = document.getElementById('messageToSeller').value.trim();
         if (!currentUser) {
-            alert('Faça login para enviar mensagem.');
+            alert('Por favor, entre na sua conta para enviar mensagens.');
             return;
         }
-        if (!text) { alert('Digite uma mensagem.'); return; }
+        if (!text) { alert('Por favor, digite uma mensagem.'); return; }
         messages.push({ from: currentUser.email, to: book.seller, text, date: Date.now() });
         saveAppState();
         renderMessages();
-        alert('Mensagem enviada ao vendedor.');
+        alert('Mensagem enviada com sucesso ao vendedor.');
         document.getElementById('messageToSeller').value='';
     });
 }
@@ -366,7 +375,7 @@ function openBookModal(bookId) {
 function closeModal(modal) { modal.classList.remove('open'); }
 
 function toggleFavorite(bookId) {
-    if (!currentUser) { alert('Faça login para favoritar livros.'); return; }
+    if (!currentUser) { alert('Por favor, entre na sua conta para favoritar livros.'); return; }
     if (favorites.includes(bookId)) {
         favorites = favorites.filter(id => id !== bookId);
     } else {
@@ -377,7 +386,7 @@ function toggleFavorite(bookId) {
 }
 
 function addToCart(bookId) {
-    if (!currentUser) { alert('Faça login para adicionar ao carrinho.'); return; }
+    if (!currentUser) { alert('Por favor, faça login para adicionar ao carrinho.'); return; }
     const item = cart.find(i => i.bookId === bookId);
     if (item) {
         item.qty += 1;
@@ -386,7 +395,7 @@ function addToCart(bookId) {
     }
     saveAppState();
     renderCart();
-    alert('Livro adicionado ao carrinho.');
+    alert('Livro adicionado ao carrinho com sucesso.');
 }
 
 function adjustCart(bookId, action) {
@@ -407,15 +416,15 @@ function updateCheckoutSummary() {
 
     checkoutSummary.innerHTML = `
         <strong>Resumo da compra:</strong><br>
-        ${cart.length} item(ns) por R$ ${total.toFixed(2)}.<br>
+        ${cart.length} item(ns) por ${formatCurrency(total)}.<br>
         <strong>Forma de pagamento:</strong> ${paymentMethod.value || 'Pix'}<br>
         <strong>Local de entrega:</strong> ${deliveryLocation.value.trim() || 'Endereço não informado'}
     `;
 }
 
 function checkout() {
-    if (!currentUser) { alert('Faça login para finalizar a compra.'); return; }
-    if (cart.length === 0) { alert('Carrinho vazio.'); return; }
+    if (!currentUser) { alert('Por favor, faça login para finalizar sua compra.'); return; }
+    if (cart.length === 0) { alert('Seu carrinho está vazio.'); return; }
 
     const userAddress = [currentUser.address, currentUser.bairro, currentUser.cep]
         .filter(Boolean)
@@ -431,7 +440,7 @@ function confirmCheckoutAction() {
     const chosenDelivery = deliveryLocation.value.trim() || 'Endereço não informado';
 
     if (!chosenDelivery) {
-        alert('Informe o local de entrega.');
+        alert('Por favor, informe o local de entrega.');
         return;
     }
 
@@ -443,7 +452,7 @@ function confirmCheckoutAction() {
     saveAppState();
     renderAll();
     closeModal(checkoutModal);
-    alert(`Compra concluída! Pagamento: ${chosenPayment}. Entrega em: ${chosenDelivery}.`);
+    alert(`Compra concluída com sucesso! Pagamento: ${chosenPayment}. Entrega em: ${chosenDelivery}.`);
 }
 
 // Autenticação
@@ -476,28 +485,28 @@ function loginUser(event) {
     const password = authPassword.value.trim();
 
     if (!email || !password || (state.authMode === 'register' && (!name || !address || !cep || !bairro))) {
-        alert('Preencha todos os campos para cadastrar sua conta.');
+        alert('Por favor, preencha todos os campos.');
         return;
     }
 
     if (state.authMode === 'login') {
         const user = users.find(u => u.email === email && u.password === password);
-        if (!user) { alert('Usuário ou senha inválidos.'); return; }
+        if (!user) { alert('E-mail ou senha inválidos. Tente novamente.'); return; }
         currentUser = { email: user.email, name: user.name, address: user.address || '', cep: user.cep || '', bairro: user.bairro || '' };
         userModal.classList.remove('open');
         renderAll();
         updateUserUI();
         saveAppState();
-        alert('Login realizado com sucesso.');
+        alert('Bem-vindo de volta! Login realizado com sucesso.');
     } else {
-        if (users.some(u => u.email === email)) { alert('Email já cadastrado.'); return; }
+        if (users.some(u => u.email === email)) { alert('Este e-mail já está cadastrado.'); return; }
         users.push({ email, name, password, address, cep, bairro });
         currentUser = { email, name, address, cep, bairro };
         userModal.classList.remove('open');
         renderAll();
         updateUserUI();
         saveAppState();
-        alert('Cadastro realizado com sucesso.');
+        alert('Cadastro realizado com sucesso. Bem-vindo!');
     }
 
     authForm.reset();
@@ -514,7 +523,7 @@ function logout() {
 
 function publishListing(event) {
     event.preventDefault();
-    if (!currentUser) { alert('Faça login para publicar anúncios.'); return; }
+    if (!currentUser) { alert('Por favor, faça login para publicar anúncios.'); return; }
 
     const title = listingFormInputs.listingTitle.value.trim();
     const author = listingFormInputs.listingAuthor.value.trim();
@@ -525,7 +534,7 @@ function publishListing(event) {
     const image = listingFormInputs.listingImage.value.trim();
 
     if (!title || !author || !description || Number.isNaN(price) || price <= 0 || !image) {
-        alert('Preencha todos os campos corretamente.');
+        alert('Por favor, preencha todos os campos corretamente.');
         return;
     }
 
@@ -544,13 +553,13 @@ openLoginBtn.addEventListener('click', () => {
         userModal.classList.add('open');
         setAuthMode('login');
     } else {
-        if (confirm('Deseja sair?')) logout();
+        if (confirm('Tem certeza que deseja sair?')) logout();
     }
 });
 closeUserModal.addEventListener('click', () => closeModal(userModal));
 closeBookModal.addEventListener('click', () => closeModal(bookModal));
 openCreateListing.addEventListener('click', () => {
-    if (!currentUser) { alert('Faça login para anunciar livros.'); return; }
+    if (!currentUser) { alert('Por favor, faça login para anunciar livros.'); return; }
     listingModal.classList.add('open');
 });
 closeListingModal.addEventListener('click', () => closeModal(listingModal));
